@@ -15,6 +15,7 @@ dependencies {
     testImplementation(platform("org.junit:junit-bom:5.10.0"))
     testImplementation("org.junit.jupiter:junit-jupiter")
     implementation("org.ini4j:ini4j:0.5.4")
+    implementation(files("libs/ojdbc8-23.9.0.25.07.jar"))
 }
 
 tasks.test {
