@@ -42,6 +42,7 @@ public class OraConnect implements AutoCloseable {
             this.connected = false;
         } else {
             this.connected = true;
+            System.out.println("✔ The \""+dbName+"\" database is connected!");
             dlm = "|";
         }
     }
@@ -122,11 +123,15 @@ public class OraConnect implements AutoCloseable {
 
     // Закрываем соединение
     @Override
-    public void close() throws SQLException {
-        if (conn != null && !conn.isClosed()) {
-            conn.close();
-            connected = false;
-            System.out.println("🔌 Connection closed");
+    public void close() {
+        try {
+            if (conn != null && !conn.isClosed()) {
+                conn.close();
+                connected = false;
+                System.out.println("🔌 Connection closed.");
+            }
+        } catch (SQLException e) {
+            System.err.println("❌ Database close error: "+e.getMessage());
         }
     }
 }

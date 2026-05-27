@@ -1,9 +1,11 @@
 package com.apsida.parus_itapt.imp_csv;
 import java.nio.file.*;
 import java.io.IOException;
+import java.sql.SQLException;
+
 public class Main {
     static String iniFileName = "imp.ini";
-    public static void main(String[] args) throws InterruptedException {
+    public static void main(String[] args) throws InterruptedException, SQLException {
         //✅
         System.out.println("Import to Parus has started!");
         {
@@ -33,6 +35,7 @@ public class Main {
             Path source = Paths.get(file.fullName());
             currFile = source.toAbsolutePath().toString();
             long bgnTime = System.currentTimeMillis();
+            System.out.print("%");
             do {
                 if ((Files.exists(source))) {
                     Path destination = Paths.get(ini.getTmpDir()+source.getFileName().toString());
@@ -45,17 +48,20 @@ public class Main {
                             System.out.println("@");
                             next = false;
                         } else {
-                            System.out.printf("-");
+                            System.out.print("\b");
+                            System.out.print("-%");
                             Thread.sleep(pollingInterval);
                         }
                     }
                     System.out.println("✔ The \""+file.fullName()+"\" file moved to a temporary directory.");
                 } else {
                     if (System.currentTimeMillis()-bgnTime >= waitingTime) {
+                        System.out.print("\b");
                         System.out.println("#");
                         next = false;
                     } else {
-                        System.out.printf("+");
+                        System.out.print("\b");
+                        System.out.print("+%");
                         Thread.sleep(pollingInterval);
                     }
                 }
@@ -64,10 +70,11 @@ public class Main {
                 break;
             }
         }
+        ora.close();
         if (next) {
-            System.out.printf("\n✔ Connecting the \""+ini.db.dbName()+"\" database.\n");
+            System.out.println("\n✔ Connecting the \""+ini.db.dbName()+"\" database.");
         } else {
-            System.err.printf("\n❌ File \""+currFile+"\" movement error to the temporary directory.\n");
+            System.err.println("❌ File \""+currFile+"\" movement error to the temporary directory.");
         }
     }
 }
