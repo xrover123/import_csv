@@ -18,22 +18,37 @@ public class OraConnect implements AutoCloseable {
     private static final Pattern SAFE_IDENTIFIER = Pattern.compile("^[a-zA-Z0-9_]+$");
 
     // Конструктор устанавливает соединение
-    public OraConnect(String ipAddr, String dbPort, String dbName, String userName, String password) throws SQLException {
+    private static Connection createConnection(String connectionStr, String userName, String password) {
+        try {
+            OracleDataSource ods = new OracleDataSource();
+            ods.setURL(connectionStr);
+            ods.setUser(userName);
+            ods.setPassword(password);
+            return ods.getConnection(); // Успешное подключение
+        } catch (SQLException e) {
+            System.err.println("❌ Failed to connect to Oracle database (" + connectionStr + "): " + e.getMessage());
+            System.err.println("Error code: " + e.getErrorCode());
+            System.err.println("SQL state: " + e.getSQLState());
+            return null; // Неудачное подключение
+        } catch (Exception e) {
+            System.err.println("❌ Unexpected error during connection: " + e.getMessage());
+            return null; // Неудачное подключение
+        }
+    }
+    public OraConnect(String ipAddr, String dbPort, String dbName, String userName, String password)  {
         String connectionStr = "jdbc:oracle:thin:@//" + ipAddr + ":" + dbPort + "/" + dbName;
-        OracleDataSource ods = new OracleDataSource();
-        ods.setURL(connectionStr);
-        ods.setUser(userName);
-        ods.setPassword(password);
-
-        this.conn = ods.getConnection();
-        System.out.println("✅ Successful connection to Oracle!");
-        this.connected = true;
-        dlm = "|";
+        this.conn = createConnection(connectionStr,userName,password);
+        if (this.conn == null) {
+            this.connected = false;
+        } else {
+            this.connected = true;
+            dlm = "|";
+        }
     }
     private boolean isValidIdentifier(String identifier) {
         return SAFE_IDENTIFIER.matcher(identifier).matches();
     }
-    // Импорт CSV-файла
+
     public boolean fileImport(String fileName, String tableName) {
         if (!connected) {
             System.err.println("❌ Not connected to database.");
@@ -65,7 +80,7 @@ public class OraConnect implements AutoCloseable {
                     }
                     stmt.executeBatch();
                     conn.commit();
-                    System.out.println("✅ File " + fileName + " imported successfully.");
+                    System.out.println("✔ File " + fileName + " imported successfully.");
                     return true;
                 }
             }

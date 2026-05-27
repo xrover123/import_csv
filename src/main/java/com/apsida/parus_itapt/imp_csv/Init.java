@@ -2,10 +2,10 @@ package com.apsida.parus_itapt.imp_csv;
 import org.ini4j.Ini;
 import java.io.File;
 import java.io.IOException;
-record Rdb(String dbName, String dbUser, String dbPass){}
+record Rdb(String dbIP, String dbPort, String dbName, String dbUser, String dbPass){}
 
 public class Init {
-    private Rdb db;
+    public Rdb db;
 
     private String tmpDir;
     private long waitingTime;
@@ -15,10 +15,12 @@ public class Init {
     public String getTmpDir() {return tmpDir;}
     public long getWaitingTime() {return waitingTime;}
     public long getPollingInterval() {return pollingInterval;}
-    public Rdb getDb() {return db;}
+    //public Rdb getDb() {return db;}
     public FileName[] getFiles() {return files;}
 
     Init(String cfgFileName){
+        String dbIP;
+        String dbPort;
         String dbName;
         String dbUser;
         String dbPass;
@@ -32,6 +34,8 @@ public class Init {
             for (String name: shortNames) {
                 files[i++] = new FileName(name,ini.get("FILES", name));
             }
+            dbIP   = ini.get("DB","DB_IP");
+            dbPort = ini.get("DB","DB_PORT");
             dbName = ini.get("DB","DB_NAME");
             dbUser = ini.get("DB","DB_USER");
             dbPass = ini.get("DB","DB_PASS");
@@ -48,7 +52,7 @@ public class Init {
                 pollingInterval = 1;
             }
 
-            db = new Rdb(dbName, dbUser, dbPass);
+            db = new Rdb(dbIP,dbPort,dbName, dbUser, dbPass);
         } catch (IOException e) {
             e.printStackTrace();
         }
