@@ -32,7 +32,13 @@ public class Init {
             files = new FileName[shortNames.length];
             int i = 0;
             for (String name: shortNames) {
-                files[i++] = new FileName(name,ini.get("FILES", name));
+                String s = ini.get("FILES", name);
+                if (s != null) {
+                    String ss[] = s.split(";",2);
+                    if (ss.length == 2) {
+                        files[i++] = new FileName(name, ss[0],ss[1]);
+                    }
+                }
             }
             dbIP   = ini.get("DB","DB_IP");
             dbPort = ini.get("DB","DB_PORT");
